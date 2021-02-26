@@ -31,7 +31,8 @@ workspace "Recipe Database"
         includedirs {
 
             "../Recipe_Database/Include",
-            "../Libraries/spdlog/include"
+            "../Libraries/spdlog/include",
+            "../Libraries/SQLiteCpp/include/SQLiteCpp"
         }
 
         links {
@@ -45,10 +46,15 @@ workspace "Recipe Database"
         }
 
         filter "system:windows"
-				defines {
+            defines {
 
-					"PLATFORM_WINDOWS"
-				}
+                "PLATFORM_WINDOWS"
+            }
+
+            links {
+
+                "../Libraries/SQLiteCpp/build/Debug/SQLiteCpp"
+            }
 
 			filter {"system:windows", "configurations:Debug"}
 				buildoptions {

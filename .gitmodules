@@ -1,0 +1,6 @@
+[submodule "Libraries/SQLiteCpp"]
+	path = Libraries/SQLiteCpp
+	url = https://github.com/shoehne/SQLiteCpp.git
+[submodule "Libraries/spdlog"]
+	path = Libraries/spdlog
+	url = https://github.com/gabime/spdlog.git
