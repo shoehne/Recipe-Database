@@ -12,15 +12,13 @@ workspace "Recipe Database"
 
     project "Recipe_Database"
         location "../%{prj.name}"
-        kind "WindowedApp"
         language "C++"
-        systemversion "latest"
 
         targetdir ("../bin/" .. output_dir .. "/%{prj.name}/")
         objdir ("../bin-obj/" .. output_dir .. "/%{prj.name}/")
 
-        pchheader "Recipe_Database_Pch.h"
-        pchsource "../Recipe_Database/Source/Recipe_Database_Pch.cpp"
+        pchheader "RecipeDatabasePch.h"
+        pchsource "../Recipe_Database/Source/RecipeDatabasePch.cpp"
 
         files {
 
@@ -32,7 +30,7 @@ workspace "Recipe Database"
 
             "../Recipe_Database/Include",
             "../Libraries/spdlog/include",
-            "../Libraries/SQLiteCpp/include/SQLiteCpp"
+            "../Libraries/SQLiteCpp/include"
         }
 
         links {
@@ -46,6 +44,7 @@ workspace "Recipe Database"
         }
 
         filter "system:windows"
+            systemversion "latest"
             defines {
 
                 "PLATFORM_WINDOWS"
@@ -75,11 +74,13 @@ workspace "Recipe Database"
             }
 
         filter "configurations:Debug"
+            kind "ConsoleApp"
             defines "DEBUG"
             runtime "Debug"
             symbols "on"
 
         filter "configurations:Release"
+        kind "WindowedApp"
             defines "RELEASE"
             runtime "Release"
             optimize "on"
