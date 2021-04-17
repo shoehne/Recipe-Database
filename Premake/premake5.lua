@@ -50,22 +50,27 @@ workspace "Recipe Database"
                 "PLATFORM_WINDOWS"
             }
 
-            links {
-
-                "../Libraries/SQLiteCpp/build/Debug/SQLiteCpp"
-            }
-
 			filter {"system:windows", "configurations:Debug"}
 				buildoptions {
 
 					"/MTd"
 				}
+                links {
+
+                    "../Libraries/SQLiteCpp/build/Debug/SQLiteCpp",
+                    "../Libraries/SQLiteCpp/build/sqlite3/Debug/sqlite3"
+                }
 
 			filter {"system:windows", "configurations:Release"}
 				buildoptions {
 
 					"/MT"
 				}
+                links {
+
+                    "../Libraries/SQLiteCpp/build/Release/SQLiteCpp",
+                    "../Libraries/SQLiteCpp/build/sqlite3/Release/sqlite3"
+                }
         
         filter "system:linux"
             defines {

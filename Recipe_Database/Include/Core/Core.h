@@ -10,6 +10,23 @@
 
 namespace Recipe_Database {
 
+	enum class Currency {
+
+		NA = 0,
+		AUD,
+		CAD,
+		EURO,
+		GBP,
+		HKD,
+		JPY,
+		USD
+	};
+
+	Currency CurrencyConversion(Currency currency) {
+
+		return currency;
+	}
+
 	template<typename T>
 	using Scope = std::unique_ptr<T>;
 	template<typename T, typename ... Args>
@@ -25,7 +42,6 @@ namespace Recipe_Database {
 
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
-
 }
 
 #endif // !CORE_H
