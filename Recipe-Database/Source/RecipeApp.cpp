@@ -1,7 +1,7 @@
 //------Precompiled header------
-#include "Recipe_Database_Pch.h"
+#include "RecipeDatabasePch.h"
 
-#include "Recipe_App.h"
+#include "RecipeApp.h"
 #include "Core/Log.h"
 
 Recipe_Database::RecipeApp::RecipeApp() {

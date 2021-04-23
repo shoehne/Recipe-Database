@@ -1,4 +1,4 @@
-workspace "Recipe Database"
+workspace "Recipe-Database"
     location "../"
     architecture "x64"
 
@@ -10,7 +10,7 @@ workspace "Recipe Database"
 
     output_dir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-    project "Recipe_Database"
+    project "Recipe-Database"
         location "../%{prj.name}"
         kind "WindowedApp"
         language "C++"
@@ -19,18 +19,18 @@ workspace "Recipe Database"
         targetdir ("../bin/" .. output_dir .. "/%{prj.name}/")
         objdir ("../bin-obj/" .. output_dir .. "/%{prj.name}/")
 
-        pchheader "Recipe_Database_Pch.h"
-        pchsource "../Recipe_Database/Source/Recipe_Database_Pch.cpp"
+        pchheader "RecipeDatabasePch.h"
+        pchsource "../Recipe-Database/Source/RecipeDatabasePch.cpp"
 
         files {
 
-            "../Recipe_Database/Include/**.h",
-            "../Recipe_Database/Source/**.cpp",
+            "../Recipe-Database/Include/**.h",
+            "../Recipe-Database/Source/**.cpp",
         }
 
         includedirs {
 
-            "../Recipe_Database/Include",
+            "../Recipe-Database/Include",
             "../Libraries/spdlog/include",
             "../Libraries/SQLiteCpp/include/SQLiteCpp"
         }
