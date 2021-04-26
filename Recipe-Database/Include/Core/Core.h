@@ -3,6 +3,16 @@
 #define CORE_H
 
 #include <memory>
+#ifdef PLATFORM_WINDOWS
+#include <rpc.h>
+#elif PLATFORM_LINUX
+#include <uuid/uuid.h>
+#endif // PLATFORM_WINDOWS
+
+// SQLiteCpp
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "Core/Log.h"
 
 #define BIT(x) (1 << x)
 
@@ -10,21 +20,64 @@
 
 namespace Recipe_Database {
 
-	enum class Currency {
+	// This function should probably run in a separate thread because
+	// the look-up times might be pretty long with larger databases.
+	// There's no reason to let the user edit the recipe and check once
+	// the user wants to save the recipe if a uuid has been generated or not.
+	bool CreateUuid(std::string uuid_str) {
 
-		NA = 0,
-		AUD,
-		CAD,
-		EURO,
-		GBP,
-		HKD,
-		JPY,
-		USD
-	};
+		uuid_str.clear();
+		uuid_str.append("#REC");
+		#ifdef PLATFORM_WINDOWS
+		UUID uuid;
+		UuidCreate(&uuid);
 
-	Currency CurrencyConversion(Currency currency) {
+		unsigned char* buffer;
+		UuidToStringA(&uuid,
+			&buffer);
+		uuid_str.append((char*)buffer);
 
-		return currency;
+		RpcStringFreeA(&buffer);
+		#elif PLATFORM_LINUX
+		uuid_t uuid;
+		uuid_generate(uuid);
+
+		char buffer[37];
+		uuid_unparse(uuid,
+			buffer);
+
+		uuid_str.append(buffer);
+		#else
+		RECIPE_DATABASE_ERROR("ERROR: The chosen platform is not supported!");
+		return false;
+		#endif // PLATFORM_WINDOWS
+
+		// Check whether the created ID is for some reason already 
+		// stored in the database.
+		try {
+
+			SQLite::Database db("./data/recipe_database.db3",
+				SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+
+			SQLite::Statement query(db, "SELECT recipe_id FROM recipes WHERE recipe_id = ?;");
+			query.bind(1, uuid_str);
+
+			if (query.executeStep()) {
+
+				RECIPE_DATABASE_WARN("WARNING: The generated ID already exists!");
+				uuid_str.clear();
+
+				return false;
+			}
+		}
+		catch (std::exception& e) {
+
+			RECIPE_DATABASE_ERROR("SQL-ERROR: {0}", e.what());
+
+			return false;
+		}
+
+		return true;
 	}
 
 	template<typename T>

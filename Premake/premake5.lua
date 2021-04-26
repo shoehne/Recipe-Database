@@ -50,6 +50,11 @@ workspace "Recipe-Database"
                 "PLATFORM_WINDOWS"
             }
 
+            links {
+
+                "Rpcrt4"
+            }
+
 			filter {"system:windows", "configurations:Debug"}
 				buildoptions {
 

@@ -104,7 +104,7 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 
 	if (window_handle == NULL) {
 
-		RECIPE_DATABASE_ERROR("Failed to create window!");
+		RECIPE_DATABASE_ERROR("ERROR: Failed to create window!");
 		return;
 	}
 
