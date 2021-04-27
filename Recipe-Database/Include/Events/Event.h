@@ -37,6 +37,11 @@ namespace Recipe_Database {
 		EVENT_CATEGORY_MOUSE					= BIT(4),
 		EVENT_CATEGORY_MOUSE_BUTTON				= BIT(5),
 		EVENT_CATEGORY_SQL						= BIT(6)
+		EVENT_CATEGORY_APPLICATION,
+		EVENT_CATEGORY_INPUT,
+		EVENT_CATEGORY_KEYBOARD,
+		EVENT_CATEGORY_MOUSE,
+		EVENT_CATEGORY_MOUSE_BUTTON
 	};
 
 // Macro to simplify implementation of the virtual event functions that need to be implemented

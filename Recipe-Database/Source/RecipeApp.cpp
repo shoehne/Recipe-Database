@@ -18,7 +18,6 @@ void Recipe_Database::RecipeApp::Init() {
 	RECIPE_DATABASE_TRACE("TRACE: Initialised Log.");
 	#endif // DEBUG
 
-
 	// Create a window with the default size and position.
 	// Use "Recipe Database" as the title for the window.
 	// TO DO: Consider supporting different languages and using

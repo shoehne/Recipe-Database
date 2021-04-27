@@ -42,7 +42,6 @@ namespace Recipe_Database {
 		std::vector<Recipe_Database::Recipe> recipes;
 		std::mutex recipes_mutex;
 		bool sql_database_connected = false;
-		uint8_t temp_table_count = 0;
 	};
 }
 
