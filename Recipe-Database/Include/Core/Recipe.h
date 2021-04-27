@@ -273,8 +273,8 @@ namespace Recipe_Database {
 		std::string nationality;
 		std::vector<Ingredient> ingredients;
 		std::string instructions;
-		// File path to a picture
-		std::string picture;
+		// Vector holding file paths to several pictures.
+		std::vector<std::string> pictures;
 
 		// Calculate the amount needed depending on the new
 		// number of servings required taking into account the 

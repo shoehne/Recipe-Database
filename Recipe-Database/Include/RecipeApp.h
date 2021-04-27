@@ -38,6 +38,7 @@ namespace Recipe_Database {
 		Ref<Window> main_window;
 		// SQLite related variables
 		// std::map<std::thread, > live_search_threads;
+		// std:: sql_query_queue;
 		std::vector<Recipe_Database::Recipe> recipes;
 		std::mutex recipes_mutex;
 		bool sql_database_connected = false;

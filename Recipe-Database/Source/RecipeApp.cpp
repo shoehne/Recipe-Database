@@ -79,7 +79,6 @@ void Recipe_Database::RecipeApp::Init() {
 			RECIPE_DATABASE_TRACE("Object ID: {0}\nColumn count: {1}\nAdditional rows: {2}", test, t, b);
 			//query.reset();
 		}
-		query.reset();
 		
 		// For debugging/testing purposes fill the tables with entries.
 		query_str.clear();
@@ -311,7 +310,21 @@ bool Recipe_Database::RecipeApp::SqlInsertQuery(Recipe recipe) {
 		recipe_query.bind(4, std::to_string(recipe.servings));
 		recipe_query.bind(5, recipe.nationality);
 		recipe_query.bind(6, recipe.instructions);
-		recipe_query.bind(7, recipe.picture);
+		// Concatenate the filepaths of all pictures for the recipe into one string.
+		std::string picture_str;
+		for (int i = 0; i < recipe.pictures.size(); i++) {
+
+			if (i < recipe.pictures.size() - 1) {
+
+				picture_str.append(recipe.pictures[i]);
+				picture_str.append(",");
+			}
+			if (i == recipe.pictures.size() - 1) {
+
+				picture_str.append(recipe.pictures[i]);
+			}
+		}
+		recipe_query.bind(7, picture_str);
 		recipe_query.exec();
 
 		query_str.clear();
@@ -532,6 +545,30 @@ bool Recipe_Database::RecipeApp::SqlSelectQuery(SqlSelectFilter filter) {
 				recipe.servings = std::stoul(query_1.getColumn(3).getString());
 				recipe.nationality = query_1.getColumn(4).getString();
 				recipe.instructions = query_1.getColumn(5).getString();
+				// Store the filepath(s) of the pictures divided by a comma in the
+				// pictures vector of the Recipe object.
+				int start = 0;
+				for (int i = 0; i < query_1.getColumn(6).getString().size(); i++) {
+
+					if (query_1.getColumn(6).getString()[i] == (char)",") {
+
+						int count = i - start;
+
+						std::string file_path = query_1.getColumn(6).getString().substr(start, count);
+
+						recipe.pictures.push_back(file_path);
+
+						start = i + 1;
+					}
+					if (i == query_1.getColumn(6).getString().size() - 1 ) {
+
+						int count = i - (start - 1);
+
+						std::string file_path = query_1.getColumn(6).getString().substr(start, count);
+
+						recipe.pictures.push_back(file_path);
+					}
+				}
 
 				recipes.push_back(recipe);
 			}
@@ -544,6 +581,30 @@ bool Recipe_Database::RecipeApp::SqlSelectQuery(SqlSelectFilter filter) {
 				recipe.servings = std::stoul(query_1.getColumn(3).getString());
 				recipe.nationality = query_1.getColumn(4).getString();
 				recipe.instructions = query_1.getColumn(5).getString();
+				// Store the filepath(s) of the pictures divided by a comma in the
+				// pictures vector of the Recipe object.
+				int start = 0;
+				for (int i = 0; i < query_1.getColumn(6).getString().size(); i++) {
+
+					if (query_1.getColumn(6).getString()[i] == (char)",") {
+
+						int count = i - start;
+
+						std::string file_path = query_1.getColumn(6).getString().substr(start, count);
+
+						recipe.pictures.push_back(file_path);
+
+						start = i + 1;
+					}
+					if (i == query_1.getColumn(6).getString().size() - 1) {
+
+						int count = i - (start - 1);
+
+						std::string file_path = query_1.getColumn(6).getString().substr(start, count);
+
+						recipe.pictures.push_back(file_path);
+					}
+				}
 
 				recipes.push_back(recipe);
 			}
@@ -723,7 +784,21 @@ bool Recipe_Database::RecipeApp::SqlUpdateQuery(Recipe recipe_old,
 		recipe_query.bind(3, std::to_string(recipe_new.servings));
 		recipe_query.bind(4, recipe_new.nationality);
 		recipe_query.bind(5, recipe_new.instructions);
-		recipe_query.bind(6, recipe_new.picture);
+		// Concatenate the filepaths of all pictures for the recipe into one string.
+		std::string picture_str;
+		for (int i = 0; i < recipe_new.pictures.size(); i++) {
+
+			if (i < recipe_new.pictures.size() - 1) {
+				
+				picture_str.append(recipe_new.pictures[i]);
+				picture_str.append(",");
+			}
+			if (i == recipe_new.pictures.size() - 1) {
+
+				picture_str.append(recipe_new.pictures[i]);
+			}
+		}
+		recipe_query.bind(6, picture_str);
 		recipe_query.bind(7, recipe_old.id);
 		recipe_query.exec();
 
