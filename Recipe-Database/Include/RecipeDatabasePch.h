@@ -8,14 +8,18 @@
 #include "Core/Window/Window.h"
 
 //------STL------
+#include <chrono>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <sstream>
+#include <thread>
 
 //------Windows specific------
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
 #include <windef.h>
+#elif PLATFORM_LINUX
 #endif // PLATFORM_WINDOWS
 
 
