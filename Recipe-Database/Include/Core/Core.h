@@ -2,6 +2,8 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "Core/Log.h"
+
 #include <memory>
 #ifdef PLATFORM_WINDOWS
 #include <rpc.h>
@@ -9,10 +11,7 @@
 #include <uuid/uuid.h>
 #endif // PLATFORM_WINDOWS
 
-// SQLiteCpp
-#include <SQLiteCpp/SQLiteCpp.h>
 
-#include "Core/Log.h"
 
 #define BIT(x) (1 << x)
 
@@ -95,6 +94,31 @@ namespace Recipe_Database {
 
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
+
+	// Convert a std::string to std::wstring for some Win32 API requirements.
+	#ifdef PLATFORM_WINDOWS
+	std::wstring ToWstring(std::string string) {
+
+		int str_len = (int)string.length() + 1;
+		int len = MultiByteToWideChar(CP_ACP,
+			0,
+			string.c_str(),
+			str_len,
+			0,
+			0);
+		wchar_t* buffer = new wchar_t[len];
+		MultiByteToWideChar(CP_ACP,
+			0,
+			string.c_str(),
+			str_len,
+			buffer,
+			len);
+
+		return buffer;
+	}
+	#endif // PLATFORM_WINDOWS
+
+
 }
 
 #endif // !CORE_H

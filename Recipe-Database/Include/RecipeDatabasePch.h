@@ -5,20 +5,26 @@
 //------Recipe Database------
 #include "Core/Core.h"
 #include "Core/Log.h"
-#include "Core/Window/Window.h"
+#include "Core/Window.h"
 
 //------STL------
 #include <chrono>
+#include <exception>
 #include <functional>
 #include <mutex>
+#include <stdio.h>
 #include <string>
 #include <sstream>
 #include <thread>
+#include <vector>
 
 //------Windows specific------
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
 #include <windef.h>
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <tchar.h>
 #elif PLATFORM_LINUX
 #endif // PLATFORM_WINDOWS
 

@@ -2,20 +2,9 @@
 #ifndef WINDOWWINDOWS_H
 #define WINDOWWINDOWS_H
 
-#include "Core/Window/Window.h"
+#include "Core/Window.h"
 
 namespace Recipe_Database {
-
-	struct WindowData {
-
-		using EventCallbackFn = std::function<void(Event&)>;
-
-		std::wstring title;
-		uint32_t x_pos, y_pos, height, width;
-		Window* parent;
-
-		EventCallbackFn event_callback;
-	};
 
 	class WindowWindows : public Window {
 

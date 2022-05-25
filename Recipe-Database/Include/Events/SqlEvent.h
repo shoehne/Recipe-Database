@@ -67,6 +67,14 @@ namespace Recipe_Database {
 		Recipe recipe;
 	};
 
+	class SqlQueryFinishedEvent : public SqlEvent {
+
+	public:
+		SqlQueryFinishedEvent() = default;
+
+		EVENT_CLASS_TYPE(SQL_QUERY_FINISHED);
+	};
+
 	class SqlSelectEvent : public SqlEvent {
 
 	public:

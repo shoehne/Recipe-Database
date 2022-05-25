@@ -1,17 +1,20 @@
 //------Precompiled header------
 #include "RecipeDatabasePch.h"
 
-#include "Core/Window/WindowWindows.h"
+#include "Platform/Windows/WindowWindows.h"
+
+#include "examples/imgui_impl_win32.h"
 
 // Windows callback function
 LRESULT CALLBACK WindowProc(HWND hwnd,
 	UINT uMsg,
 	WPARAM wParam,
 	LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 Recipe_Database::WindowWindows::WindowWindows(const WindowProps& props) {
 
-	WindowWindows::Init(props);
+	
 }
 
 Recipe_Database::WindowWindows::~WindowWindows() {
@@ -43,30 +46,6 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 		return;
 	}
 
-	// Convert props' title to std::wstring so the WinApi can use it...
-	// Sometimes Windows is annoying >.<.
-	int str_len = (int)props.title.length() + 1;
-	int len = MultiByteToWideChar(CP_ACP,
-		0,
-		props.title.c_str(),
-		str_len,
-		0,
-		0);
-	wchar_t* buffer = new wchar_t[len];
-	MultiByteToWideChar(CP_ACP,
-		0,
-		props.title.c_str(),
-		str_len,
-		buffer,
-		len);
-	window_data->title = buffer;
-	delete[] buffer;
-	window_data->x_pos = props.x_pos;
-	window_data->y_pos = props.y_pos;
-	window_data->height = props.height;
-	window_data->width = props.width;
-	window_data->parent = props.parent;
-	
 	// Assume that the created window has no parent.
 	HWND parent = NULL;
 	// Check whether window_data.parent points to an empty address.
@@ -90,7 +69,7 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 	// Create the window
 	window_handle = CreateWindowEx(0,
 		CLASS_NAME,
-		window_data->title.c_str(),
+		Recipe_Database::ToWstring(window_data->title).c_str(),
 		WS_OVERLAPPEDWINDOW,
 		// Initial position and size of the window.
 		window_data->x_pos,
@@ -110,6 +89,7 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 
 	ShowWindow(window_handle,
 		SW_SHOW);
+	UpdateWindow(window_handle);
 }
 
 void Recipe_Database::WindowWindows::OnUpdate() {
@@ -158,6 +138,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd,
 		LONG_PTR ptr = GetWindowLongPtr(hwnd,
 			GWLP_USERDATA);
 		data = reinterpret_cast<Recipe_Database::WindowData*>(ptr);
+	}
+
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, 
+		uMsg,
+		wParam,
+		lParam)) {
+
+		return true;
 	}
 
 	switch (uMsg) {

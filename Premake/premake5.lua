@@ -10,9 +10,14 @@ workspace "Recipe-Database"
 
     output_dir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+    IncludeDir = {}
+    IncludeDir["SQLiteCpp"] = "../Libraries/SQLiteCpp/include"
+    IncludeDir["ImGui"] = "../Libraries/imgui"
+
     project "Recipe-Database"
         location "../%{prj.name}"
         language "C++"
+        kind "WindowedApp"
 
         targetdir ("../bin/" .. output_dir .. "/%{prj.name}/")
         objdir ("../bin-obj/" .. output_dir .. "/%{prj.name}/")
@@ -30,7 +35,8 @@ workspace "Recipe-Database"
 
             "../Recipe-Database/Include",
             "../Libraries/spdlog/include",
-            "../Libraries/SQLiteCpp/include"
+            "%{IncludeDir.SQLiteCpp}",
+            "%{IncludeDir.ImGui}"
         }
 
         links {
@@ -52,7 +58,8 @@ workspace "Recipe-Database"
 
             links {
 
-                "Rpcrt4"
+                "Rpcrt4",
+                "d3dcompiler"
             }
 
 			filter {"system:windows", "configurations:Debug"}
@@ -62,8 +69,9 @@ workspace "Recipe-Database"
 				}
                 links {
 
-                    "../Libraries/SQLiteCpp/build/Debug/SQLiteCpp",
-                    "../Libraries/SQLiteCpp/build/sqlite3/Debug/sqlite3"
+                    "../bin/" .. output_dir .. "/sqlite3_win/sqlite3",
+                    "../bin/" .. output_dir .. "/SQLiteCpp_win/SQLiteCpp",
+                    "../bin/" .. output_dir .. "/imgui_win/imgui"
                 }
 
 			filter {"system:windows", "configurations:Release"}
@@ -73,8 +81,9 @@ workspace "Recipe-Database"
 				}
                 links {
 
-                    "../Libraries/SQLiteCpp/build/Release/SQLiteCpp",
-                    "../Libraries/SQLiteCpp/build/sqlite3/Release/sqlite3"
+                    "../bin/" .. output_dir .. "/sqlite3_win/sqlite3",
+                    "../bin/" .. output_dir .. "/SQLiteCpp_win/SQLiteCpp",
+                    "../bin/" .. output_dir .. "/imgui_win/imgui"
                 }
         
         filter "system:linux"
@@ -83,14 +92,41 @@ workspace "Recipe-Database"
                 "PLATFORM_LINUX"
             }
 
+            filter {"system:linux", "configurations:Debug"}
+                buildoptions {
+
+
+                }
+                links {
+
+                    "../bin/" .. output_dir .. "/sqlite3_win/sqlite3",
+                    "../bin/" .. output_dir .. "/SQLiteCpp_win/SQLiteCpp",
+                    "../bin/" .. output_dir .. "/imgui_win/imgui"
+                }
+            
+            filter {"system:linux", "configurations:Release"}
+                buildoptions {
+
+
+                }
+                links {
+
+                    "../bin/" .. output_dir .. "/sqlite3_win/sqlite3",
+                    "../bin/" .. output_dir .. "/SQLiteCpp_win/SQLiteCpp",
+                    "../bin/" .. output_dir .. "/imgui_win/imgui"
+                }
+
         filter "configurations:Debug"
-            kind "ConsoleApp"
             defines "DEBUG"
             runtime "Debug"
             symbols "on"
 
         filter "configurations:Release"
-        kind "WindowedApp"
             defines "RELEASE"
             runtime "Release"
             optimize "on"
+
+    group "Libraries"
+
+        include "../Libraries/SQLiteCpp"
+        include "../Libraries/imgui"

@@ -29,6 +29,17 @@ namespace Recipe_Database{
 		Recipe_Database::Window* parent;
 	};
 
+	struct WindowData {
+
+		using EventCallbackFn = std::function<void(Event&)>;
+
+		std::string title;
+		uint32_t x_pos, y_pos, height, width;
+		Window* parent;
+
+		EventCallbackFn event_callback;
+	};
+
 	class Window {
 
 	public:
@@ -39,6 +50,7 @@ namespace Recipe_Database{
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual void* GetNativeWindow() const = 0;
+		virtual void Init(const WindowProps& props) = 0;
 		virtual void OnUpdate() = 0;
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;

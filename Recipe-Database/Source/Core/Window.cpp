@@ -1,10 +1,10 @@
 //------Precompiled header------
 #include "RecipeDatabasePch.h"
 
-#include "Core/Window/Window.h"
+#include "Core/Window.h"
 
 #ifdef PLATFORM_WINDOWS
-#include "Core/Window/WindowWindows.h"
+#include "Platform/Windows/WindowWindows.h"
 #elif PLATFORM_LINUX
 #include "Core/Window/WindowLinux.h"
 #endif // PLATFORM_WINDOWS
