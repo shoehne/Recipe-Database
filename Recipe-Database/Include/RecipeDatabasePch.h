@@ -4,7 +4,6 @@
 
 //------Recipe Database------
 #include "Core/Core.h"
-#include "Core/Log.h"
 #include "Core/Window.h"
 
 //------STL------
@@ -25,6 +24,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <tchar.h>
+//------Linux specific------
 #elif PLATFORM_LINUX
 #endif // PLATFORM_WINDOWS
 

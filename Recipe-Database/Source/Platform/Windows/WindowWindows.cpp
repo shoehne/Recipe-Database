@@ -2,8 +2,10 @@
 #include "RecipeDatabasePch.h"
 
 #include "Platform/Windows/WindowWindows.h"
+#include "Platform/Windows/ImGuiD3D11Impl.h"
+#include "Platform/Windows/ImGuiWin32Impl.h"
 
-#include "examples/imgui_impl_win32.h"
+#include "imgui.h"
 
 // Windows callback function
 LRESULT CALLBACK WindowProc(HWND hwnd,
@@ -11,6 +13,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd,
 	WPARAM wParam,
 	LPARAM lParam);
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// Data
+static ID3D11Device* d3d_device = NULL;
+static ID3D11DeviceContext* d3d_device_context = NULL;
+static IDXGISwapChain* swap_chain = NULL;
+static ID3D11RenderTargetView* main_render_target_view = NULL;
 
 Recipe_Database::WindowWindows::WindowWindows(const WindowProps& props) {
 
@@ -32,9 +40,115 @@ uint32_t Recipe_Database::WindowWindows::GetWidth() const {
 	return window_data->width;
 }
 
+void Recipe_Database::WindowWindows::OnUpdate() {
+
+	MSG message = {};
+
+	// Peek for a message without blocking the thread.
+	bool peek = PeekMessage(&message,
+		window_handle,
+		0,
+		0,
+		PM_REMOVE);
+	
+	// If peek equals 0 then there is no message currently available.
+	// In that case just exit without trying to translate and dispatch a message.
+	if (peek == 0) {
+	
+		return;
+	}
+	
+	TranslateMessage(&message);
+	DispatchMessage(&message);
+}
+
 void Recipe_Database::WindowWindows::SetEventCallback(const EventCallbackFn& callback) {
 
 	window_data->event_callback = callback;
+}
+
+void Recipe_Database::WindowWindows::CleanUpDeviceD3D() {
+
+	CleanUpRenderTarget();
+	if (swap_chain) {
+
+		swap_chain->Release();
+		swap_chain = NULL;
+	}
+	if (d3d_device_context) {
+
+		d3d_device_context->Release();
+		d3d_device_context = NULL;
+	}
+	if (d3d_device) {
+
+		d3d_device->Release();
+		d3d_device = NULL;
+	}
+}
+
+void Recipe_Database::WindowWindows::CleanUpRenderTarget() {
+
+	if (main_render_target_view) {
+
+		main_render_target_view->Release();
+		main_render_target_view = NULL;
+	}
+}
+
+bool Recipe_Database::WindowWindows::CreateDeviceD3D(HWND hwnd) {
+
+	// Setup swap chain.
+	DXGI_SWAP_CHAIN_DESC sd;
+	ZeroMemory(&sd,
+		sizeof(sd));
+	sd.BufferCount = 2;
+	sd.BufferDesc.Width = 0;
+	sd.BufferDesc.Height = 0;
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = window_handle;
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+	UINT create_device_flags = 0;
+	D3D_FEATURE_LEVEL feature_level;
+	const D3D_FEATURE_LEVEL feature_level_array[2] = { D3D_FEATURE_LEVEL_11_0,
+	D3D_FEATURE_LEVEL_10_0 };
+	if (D3D11CreateDeviceAndSwapChain(NULL,
+		D3D_DRIVER_TYPE_HARDWARE,
+		NULL,
+		create_device_flags,
+		feature_level_array,
+		2,
+		D3D11_SDK_VERSION,
+		&sd,
+		&swap_chain,
+		&d3d_device,
+		&feature_level,
+		&d3d_device_context) != S_OK) {
+
+		return false;
+	}
+
+	CreateRenderTarget();
+	return true;
+}
+
+void Recipe_Database::WindowWindows::CreateRenderTarget() {
+
+	ID3D11Texture2D* back_buffer;
+	swap_chain->GetBuffer(0,
+		IID_PPV_ARGS(&back_buffer));
+	d3d_device->CreateRenderTargetView(back_buffer,
+		NULL,
+		&main_render_target_view);
+	back_buffer->Release();
 }
 
 void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
@@ -69,7 +183,7 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 	// Create the window
 	window_handle = CreateWindowEx(0,
 		CLASS_NAME,
-		Recipe_Database::ToWstring(window_data->title).c_str(),
+		ToWstring(window_data->title).c_str(),
 		WS_OVERLAPPEDWINDOW,
 		// Initial position and size of the window.
 		window_data->x_pos,
@@ -87,32 +201,44 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 		return;
 	}
 
+	// Initialise Direct3D.
+	if (!CreateDeviceD3D(window_handle)) {
+
+		CleanUpDeviceD3D();
+		UnregisterClass(window_class.lpszClassName,
+			window_class.hInstance);
+		return;
+	}
+
 	ShowWindow(window_handle,
 		SW_SHOW);
 	UpdateWindow(window_handle);
-}
 
-void Recipe_Database::WindowWindows::OnUpdate() {
+	// Setup Dear ImGui context.
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); 
+	(void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-	MSG message = {};
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
 
-	// Peek for a message without blocking the thread.
-	bool peek = PeekMessage(&message,
-		window_handle,
-		0,
-		0,
-		PM_REMOVE);
-	
-	// If peek equals 0 then there is no message currently available.
-	// In that case just exit without trying to translate and dispatch a message.
-	if (peek == 0) {
-	
-		return;
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
-	
-	TranslateMessage(&message);
-	DispatchMessage(&message);
+
+	// Setup platform/renderer bindings.
+	ImGui_ImplWin32_Init(window_handle);
+	ImGui_ImplDX11_Init(d3d_device,
+		d3d_device_context);
 }
+
 
 void Recipe_Database::WindowWindows::Shutdown() {
 
@@ -156,7 +282,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd,
 			data->event_callback(event);
 		}
 		case WM_SIZE: {
-
 
 		}
 	}

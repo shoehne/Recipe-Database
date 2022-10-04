@@ -4,6 +4,9 @@
 
 #include "Core/Recipe.h"
 #include "Events/Event.h"
+#include "Core/Core.h"
+
+#include <map>
 
 namespace Recipe_Database {
 

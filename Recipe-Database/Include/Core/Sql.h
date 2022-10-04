@@ -32,7 +32,7 @@ namespace Recipe_Database {
 		
 	private:
 		std::vector<Scope<SqlQuery*>> queries;
-		bool query_running = false;
+		//bool query_running = false;
 	};
 
 	class SqlQuery {
@@ -41,7 +41,7 @@ namespace Recipe_Database {
 		using EventCallbackFn = std::function<void(Event&)>;
 
 		SqlQuery() = default;
-		~SqlQuery();
+		~SqlQuery() {}
 
 		virtual bool Run() = 0;
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
@@ -72,6 +72,8 @@ namespace Recipe_Database {
 		virtual void SetEventCallback(const EventCallbackFn& callback) override;
 
 	private:
+		bool DuplicateId(std::string id);
+
 		EventCallbackFn event_callback;
 		Recipe recipe;
 	};

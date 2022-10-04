@@ -18,20 +18,24 @@ namespace Recipe_Database {
 
 	void SqlQueryStack::ExecuteQuery() {
 
-		// Execute the Run function of the first query in the stack and set query_running to "true".
-		if (query_running == false) {
+		// Execute the Run function of the first query in the stack.
+		// To DO: Make the query execute in a separate thread to allow the user to
+		// stack queries ie. select multiple filters without having to deal with a frozen UI.
+		if (!queries.empty()) {
+		
+			RECIPE_DATABASE_TRACE("Querystack is empty!");
 
-			auto it = queries.begin();
-			std::thread t((*(*it))->Run());
-			t.detach();
-			query_running = true;
+			return;
 		}
+		
+		auto it = queries.begin();
+		(*(*it))->Run();
 	}
 
 	void SqlQueryStack::OnEvent(Event& e) {
 
 		// Remove the first element of the stack and set query_running to "false".
-		query_running = false;
+		//query_running = false;
 		auto it = queries.begin();
 		queries.erase(it);
 
@@ -47,15 +51,10 @@ namespace Recipe_Database {
 
 		// Emplace the new query at back of the stack. If there is currently no query executing
 		// execute the first query on the stack i.e. when there are no queries currently being 
-		// executed.
+		// executed execute the first query on the stack.
 		query->SetEventCallback(BIND_EVENT(SqlQueryStack::OnEvent));
 		queries.emplace_back(CreateScope<Recipe_Database::SqlQuery*>(query));
 		ExecuteQuery();
-	}
-
-	SqlQuery::~SqlQuery() {
-
-
 	}
 
 	SqlDeleteQuery::SqlDeleteQuery(std::string id,
@@ -131,10 +130,16 @@ namespace Recipe_Database {
 	bool SqlInsertQuery::Run() {
 
 		// If DEBUG is defined run a timer to see if the query completes in an 
-	// acceptable time frame with larger databases.
+		// acceptable time frame with larger databases.
+
+		// Create a unique ID for the recipe.
+		std::string id;
+		do {
+		
+			Recipe_Database::CreateUuid(id);
+		} while (SqlInsertQuery::DuplicateId(id));
 
 		try {
-
 			SQLite::Database db("./data/recipe_database.db3",
 				SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
@@ -145,7 +150,7 @@ namespace Recipe_Database {
 			query_str.append(" VALUES(?, ?, ?, ?, ?, ?, ?);");
 			SQLite::Statement recipe_query(db,
 				query_str);
-			recipe_query.bind(1, recipe.id);
+			recipe_query.bind(1, id);
 			recipe_query.bind(2, recipe.name);
 			recipe_query.bind(3, recipe.course);
 			recipe_query.bind(4, std::to_string(recipe.servings));
@@ -217,6 +222,34 @@ namespace Recipe_Database {
 	void SqlInsertQuery::SetEventCallback(const EventCallbackFn& callback) {
 
 		event_callback = callback;
+	}
+
+	bool SqlInsertQuery::DuplicateId(std::string id) {
+
+		// Check whether the created ID is for some reason already 
+		// stored in the database.
+		try {
+
+			SQLite::Database db("./data/recipe_database.db3",
+				SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+
+			SQLite::Statement query(db, "SELECT recipe_id FROM recipes WHERE recipe_id = ?;");
+			query.bind(1, id);
+
+			if (query.executeStep()) {
+
+				RECIPE_DATABASE_WARN("WARNING: The generated ID already exists!");
+				id.clear();
+
+				return true;
+			}
+		}
+		catch (std::exception& e) {
+
+			RECIPE_DATABASE_ERROR("SQL-ERROR: {0}", e.what());
+
+			return true;
+		}
 	}
 
 	SqlSelectQuery::SqlSelectQuery(Ref<std::vector<Recipe_Database::Recipe>> r, 

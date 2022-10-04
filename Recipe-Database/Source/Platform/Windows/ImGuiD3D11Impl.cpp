@@ -1,5 +1,4 @@
 #include "RecipeDatabasePch.h"
-
 #include "Platform/Windows/ImGuiD3D11Impl.h"
 
 // dear imgui: Renderer for DirectX11

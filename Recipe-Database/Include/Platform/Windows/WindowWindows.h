@@ -20,6 +20,10 @@ namespace Recipe_Database {
 
 	private:
 		
+		void CleanUpDeviceD3D();
+		void CleanUpRenderTarget();
+		bool CreateDeviceD3D(HWND hwnd);
+		void CreateRenderTarget();
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 

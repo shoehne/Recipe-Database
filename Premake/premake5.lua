@@ -59,7 +59,8 @@ workspace "Recipe-Database"
             links {
 
                 "Rpcrt4",
-                "d3dcompiler"
+                "d3dcompiler",
+                "d3d11"
             }
 
 			filter {"system:windows", "configurations:Debug"}
