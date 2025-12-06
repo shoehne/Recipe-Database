@@ -2,10 +2,10 @@
 #include "RecipeDatabasePch.h"
 
 #include "Platform/Windows/WindowWindows.h"
-#include "Platform/Windows/ImGuiD3D11Impl.h"
-#include "Platform/Windows/ImGuiWin32Impl.h"
+//#include "Platform/Windows/ImGuiD3D11Impl.h"
+//#include "Platform/Windows/ImGuiWin32Impl.h"
 
-#include "imgui.h"
+
 
 // Windows callback function
 LRESULT CALLBACK WindowProc(HWND hwnd,
@@ -22,7 +22,7 @@ static ID3D11RenderTargetView* main_render_target_view = NULL;
 
 Recipe_Database::WindowWindows::WindowWindows(const WindowProps& props) {
 
-	
+	Init(props);
 }
 
 Recipe_Database::WindowWindows::~WindowWindows() {
@@ -42,24 +42,47 @@ uint32_t Recipe_Database::WindowWindows::GetWidth() const {
 
 void Recipe_Database::WindowWindows::OnUpdate() {
 
-	MSG message = {};
-
+	MSG msg;
+	ZeroMemory(&msg,
+		sizeof(msg));
 	// Peek for a message without blocking the thread.
-	bool peek = PeekMessage(&message,
+	if (PeekMessage(&msg,
 		window_handle,
 		0,
 		0,
-		PM_REMOVE);
-	
-	// If peek equals 0 then there is no message currently available.
-	// In that case just exit without trying to translate and dispatch a message.
-	if (peek == 0) {
-	
-		return;
+		PM_REMOVE)) {
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
-	
-	TranslateMessage(&message);
-	DispatchMessage(&message);
+
+	// Start the ImGui frame.
+	ImGui::SetCurrentContext(imgui_context);
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	// Rendering
+	ImGui::Render();
+	d3d_device_context->OMSetRenderTargets(1,
+		&main_render_target_view,
+		NULL);
+	d3d_device_context->ClearRenderTargetView(main_render_target_view,
+		(float*)&ImVec4(0.45f,
+			0.55f,
+			0.60f,
+			1.00f));
+
+	// Update and render additional platform windows.
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
+
+	// Present with V-Sync.
+	swap_chain->Present(1,
+		0);
 }
 
 void Recipe_Database::WindowWindows::SetEventCallback(const EventCallbackFn& callback) {
@@ -160,17 +183,14 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 		return;
 	}
 
-	// Assume that the created window has no parent.
-	HWND parent = NULL;
-	// Check whether window_data.parent points to an empty address.
-	// If it points to a valid object assign the stored window handle to HWND parent.
-	if (window_data->parent != nullptr) {
-
-		parent = (HWND)window_data->parent->GetNativeWindow();
-	}
-
 	// Register the window class.
 	const wchar_t CLASS_NAME[] = L"Recipe Database";
+	window_data->title = props.title;
+	window_data->x_pos = props.x_pos;
+	window_data->y_pos = props.y_pos;
+	window_data->height = props.height;
+	window_data->width = props.width;
+	window_data->parent = props.parent;
 
 	WNDCLASS window_class = {};
 
@@ -190,7 +210,7 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 		window_data->y_pos,
 		window_data->width,
 		window_data->height,
-		parent,
+		(HWND)window_data->parent,
 		NULL,
 		GetModuleHandle(0),
 		window_data);
@@ -216,8 +236,9 @@ void Recipe_Database::WindowWindows::Init(const WindowProps& props) {
 
 	// Setup Dear ImGui context.
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); 
+	imgui_context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(imgui_context);
+	io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

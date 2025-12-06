@@ -24,7 +24,12 @@ void Recipe_Database::RecipeApp::Init() {
 	// language appropriate titles.
 	std::string name = "Recipe Database";
 
-	main_window = Window::Create(WindowProps(name));
+	main_window = Window::Create(WindowProps(name,
+		0,
+		0,
+		1280,
+		720,
+		NULL));
 	main_window->SetEventCallback(BIND_EVENT(RecipeApp::OnEvent));
 
 	// Create the necessary tables in the database if they do 

@@ -23,14 +23,18 @@ namespace Recipe_Database {
 		uuid_str.append("#REC");
 		#ifdef PLATFORM_WINDOWS
 		UUID uuid;
-		UuidCreate(&uuid);
+		if (UuidCreate(&uuid) == RPC_S_OK) {
 
-		unsigned char* buffer;
-		UuidToStringA(&uuid,
-			&buffer);
-		uuid_str.append((char*)buffer);
+			unsigned char* buffer;
+			if (UuidToStringA(&uuid,
+				&buffer) == RPC_S_OK) {
 
-		RpcStringFreeA(&buffer);
+				uuid_str.append((char*)buffer);
+				RpcStringFreeA(&buffer);
+			}
+			else RECIPE_DATABASE_INFO("Failed to create unique ID.");
+		}
+		else RECIPE_DATABASE_INFO("Failed to create unique ID.");
 		#elif PLATFORM_LINUX
 		uuid_t uuid;
 		uuid_generate(uuid);

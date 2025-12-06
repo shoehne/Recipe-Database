@@ -4,6 +4,8 @@
 
 #include "Core/Core.h"
 
+#include <sstream>
+
 namespace Recipe_Database {
 
 	enum class EventType {

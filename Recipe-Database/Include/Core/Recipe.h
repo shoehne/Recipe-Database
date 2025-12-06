@@ -269,7 +269,7 @@ namespace Recipe_Database {
 		std::string name;
 		std::string course;
 		std::vector<std::string> dish_type;
-		uint8_t servings = 10;
+		uint16_t servings = 10;
 		std::string nationality;
 		std::vector<Ingredient> ingredients;
 		std::string instructions;

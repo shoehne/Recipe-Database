@@ -243,6 +243,8 @@ namespace Recipe_Database {
 
 				return true;
 			}
+
+			return false;
 		}
 		catch (std::exception& e) {
 
@@ -419,7 +421,7 @@ namespace Recipe_Database {
 					recipe.id = query_1.getColumn(0).getString();
 					recipe.name = query_1.getColumn(1).getString();
 					recipe.course = query_1.getColumn(2).getString();
-					recipe.servings = std::stoul(query_1.getColumn(3).getString());
+					recipe.servings = (uint16_t)std::stoul(query_1.getColumn(3).getString());
 					recipe.nationality = query_1.getColumn(4).getString();
 					recipe.instructions = query_1.getColumn(5).getString();
 					// Store the filepath(s) of the pictures divided by a comma in the
@@ -455,7 +457,7 @@ namespace Recipe_Database {
 					recipe.id = query_1.getColumn(0).getString();
 					recipe.name = query_1.getColumn(1).getString();
 					recipe.course = query_1.getColumn(2).getString();
-					recipe.servings = std::stoul(query_1.getColumn(3).getString());
+					recipe.servings = (uint16_t)std::stoul(query_1.getColumn(3).getString());
 					recipe.nationality = query_1.getColumn(4).getString();
 					recipe.instructions = query_1.getColumn(5).getString();
 					// Store the filepath(s) of the pictures divided by a comma in the
@@ -689,7 +691,7 @@ namespace Recipe_Database {
 			query_str.append("WHERE recipe_id=? AND ingredient_name=?;");
 			if (recipe_old.ingredients.size() == recipe_new.ingredients.size()) {
 
-				for (int i = 0; i < recipe_old.ingredients.size(); i++) {
+				for (size_t i = 0; i < recipe_old.ingredients.size(); i++) {
 
 					SQLite::Statement ingredient_query(db,
 						query_str);
@@ -706,9 +708,9 @@ namespace Recipe_Database {
 			}
 			else if (recipe_old.ingredients.size() > recipe_new.ingredients.size()) {
 
-				int difference = recipe_old.ingredients.size() - recipe_new.ingredients.size();
+				size_t difference = recipe_old.ingredients.size() - recipe_new.ingredients.size();
 
-				for (int i = 0; i < recipe_new.ingredients.size(); i++) {
+				for (size_t i = 0; i < recipe_new.ingredients.size(); i++) {
 
 					SQLite::Statement ingredient_query(db,
 						query_str);
@@ -723,7 +725,7 @@ namespace Recipe_Database {
 					ingredient_query.exec();
 				}
 				// DELETE any "leftovers".
-				for (int i = difference; i < recipe_old.ingredients.size(); i++) {
+				for (size_t i = difference; i < recipe_old.ingredients.size(); i++) {
 
 					SQLite::Statement ingredient_query(db,
 						"DELETE FROM ingredients WHERE recipe_id=? AND ingredient_name=?;");
@@ -734,9 +736,9 @@ namespace Recipe_Database {
 			}
 			else if (recipe_old.ingredients.size() < recipe_new.ingredients.size()) {
 
-				int difference = recipe_new.ingredients.size() - recipe_old.ingredients.size();
+				size_t difference = recipe_new.ingredients.size() - recipe_old.ingredients.size();
 
-				for (int i = 0; i < recipe_old.ingredients.size(); i++) {
+				for (size_t i = 0; i < recipe_old.ingredients.size(); i++) {
 
 					SQLite::Statement ingredient_query(db,
 						query_str);
@@ -753,7 +755,7 @@ namespace Recipe_Database {
 					// Finalise the ingredient_query.
 					ingredient_query.~Statement();
 				}
-				for (int i = difference; i < recipe_new.ingredients.size(); i++) {
+				for (size_t i = difference; i < recipe_new.ingredients.size(); i++) {
 
 					query_str.clear();
 					query_str.append("INSERT INTO ingredients(recipe_id, ingredient_name, ingredient_type");
@@ -795,8 +797,8 @@ namespace Recipe_Database {
 			}
 			else if (recipe_old.dish_type.size() > recipe_new.dish_type.size()) {
 
-				int difference = recipe_old.dish_type.size() - recipe_new.dish_type.size();
-				for (int i = 0; i < recipe_new.dish_type.size(); i++) {
+				size_t difference = recipe_old.dish_type.size() - recipe_new.dish_type.size();
+				for (size_t i = 0; i < recipe_new.dish_type.size(); i++) {
 
 					SQLite::Statement type_query(db,
 						query_str);
@@ -805,7 +807,7 @@ namespace Recipe_Database {
 					type_query.bind(3, recipe_old.dish_type[i]);
 					type_query.exec();
 				}
-				for (int i = difference; i < recipe_old.dish_type.size(); i++) {
+				for (size_t i = difference; i < recipe_old.dish_type.size(); i++) {
 
 					SQLite::Statement type_query(db,
 						"DELETE FROM dish_types WHERE recipe_id=? AND dish_type=?;");
@@ -816,9 +818,9 @@ namespace Recipe_Database {
 			}
 			else if (recipe_old.dish_type.size() < recipe_new.dish_type.size()) {
 
-				int difference = recipe_new.dish_type.size() - recipe_old.dish_type.size();
+				size_t difference = recipe_new.dish_type.size() - recipe_old.dish_type.size();
 
-				for (int i = 0; i < recipe_old.dish_type.size(); i++) {
+				for (size_t i = 0; i < recipe_old.dish_type.size(); i++) {
 
 					SQLite::Statement type_query(db,
 						query_str);
@@ -827,7 +829,7 @@ namespace Recipe_Database {
 					type_query.bind(3, recipe_old.dish_type[i]);
 					type_query.exec();
 				}
-				for (int i = difference; i < recipe_new.dish_type.size(); i++) {
+				for (size_t i = difference; i < recipe_new.dish_type.size(); i++) {
 
 					query_str.clear();
 					query_str.append("INSERT INTO dish_types(recipe_id, dish_type) ");

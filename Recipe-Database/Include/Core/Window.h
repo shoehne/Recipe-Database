@@ -6,6 +6,8 @@
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 
+#include "imgui.h"
+
 namespace Recipe_Database{
 
 	class Window;
@@ -13,7 +15,7 @@ namespace Recipe_Database{
 	// Main properties of the window (title, width, height)
 	struct WindowProps {
 
-		WindowProps(const std::string& name = "Recipe Database",
+		WindowProps(const std::string& name = "",
 			uint32_t x = 0,
 			uint32_t y = 0,
 			uint32_t w = 1280,
@@ -30,6 +32,14 @@ namespace Recipe_Database{
 	};
 
 	struct WindowData {
+
+		WindowData(const std::string& name = "",
+			uint32_t x = 0,
+			uint32_t y = 0,
+			uint32_t w = 0,
+			uint32_t h = 0,
+			Recipe_Database::Window* p = nullptr) 
+		: title(name), x_pos(x), y_pos(y), width(w), height(h), parent(p) {}
 
 		using EventCallbackFn = std::function<void(Event&)>;
 
@@ -50,6 +60,7 @@ namespace Recipe_Database{
 		virtual uint32_t GetHeight() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual void* GetNativeWindow() const = 0;
+		virtual void* GetParentWindow() const = 0;
 		virtual void Init(const WindowProps& props) = 0;
 		virtual void OnUpdate() = 0;
 		// Window attributes
